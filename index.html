@@ -293,7 +293,7 @@
             const ctx = canvas.getContext("2d");
             canvas.width = 2048;
             canvas.height = 512;
-            ctx.font = "bold 120px sans-serif";
+            ctx.font = "bold 200px 'Microsoft YaHei', sans-serif";
             ctx.fillStyle = "white";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
@@ -310,12 +310,12 @@
  
             const color = new THREE.Color();
  
-            for (let y = 0; y < canvas.height; y += 6) {
-                for (let x = 0; x < canvas.width; x += 6) {
+            for (let y = 0; y < canvas.height; y += 5) {
+                for (let x = 0; x < canvas.width; x += 5) {
                     const index = (y * canvas.width + x) * 4;
                     if (data[index + 3] > 128) {
-                        const px = (x - canvas.width / 2) * 0.03;
-                        const py = -(y - canvas.height / 2) * 0.03 + 8;
+                        const px = (x - canvas.width / 2) * 0.02;
+                        const py = -(y - canvas.height / 2) * 0.02 + 2;
                         const pz = 0;
  
                         positions.push(px, py, pz);
@@ -357,9 +357,9 @@
                     vec4 mvPosition = modelViewMatrix * vec4( p, 1.0 );
                     float amplitude = texture2D( tAudioData, vec2( mIndex, 0.1 ) ).r;
                     float amplitudeClamped = clamp(amplitude-0.4,0.0, 0.6 );
-                    float sizeMapped = map(amplitudeClamped, 0.0, 0.6, 1.0, 20.0);
+                    float sizeMapped = map(amplitudeClamped, 0.0, 0.6, 2.0, 20.0);
                     opacity = 1.0;
-                    gl_PointSize = sizeMapped * ( 40.0 / -mvPosition.z );
+                    gl_PointSize = sizeMapped * ( 100.0 / -mvPosition.z );
                     gl_Position = projectionMatrix * mvPosition;
                 }
             `;
