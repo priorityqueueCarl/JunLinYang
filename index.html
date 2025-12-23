@@ -314,8 +314,8 @@
                 for (let x = 0; x < canvas.width; x += 5) {
                     const index = (y * canvas.width + x) * 4;
                     if (data[index + 3] > 128) {
-                        const px = (x - canvas.width / 2) * 0.02;
-                        const py = -(y - canvas.height / 2) * 0.02 + 2;
+                        const px = (x - canvas.width / 2) * 0.02 + 5;
+                        const py = -(y - canvas.height / 2) * 0.02 + 8;
                         const pz = 0;
  
                         positions.push(px, py, pz);
@@ -714,3 +714,4 @@
 </body>
  
 </html>
+
