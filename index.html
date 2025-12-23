@@ -314,7 +314,7 @@
             const aspect = window.innerWidth / window.innerHeight;
             // 屏幕越窄（手机竖屏），文字需要缩得越小，位置可能需要微调
             const scaleFactor = aspect < 1 ? 0.01 : 0.02; 
-            const yOffset = aspect < 1 ? 5 : 2;
+            const yOffset = aspect < 1 ? 50 : 20;
  
             for (let y = 0; y < canvas.height; y += 5) {
                 for (let x = 0; x < canvas.width; x += 5) {
@@ -721,3 +721,4 @@
 </body>
  
 </html>
+
