@@ -310,12 +310,19 @@
  
             const color = new THREE.Color();
  
+            // 根据屏幕宽高比调整文字缩放和位置
+            const aspect = window.innerWidth / window.innerHeight;
+            // 屏幕越窄（手机竖屏），文字需要缩得越小，位置可能需要微调
+            const scaleFactor = aspect < 1 ? 0.01 : 0.02; 
+            const yOffset = aspect < 1 ? 5 : 2;
+ 
             for (let y = 0; y < canvas.height; y += 5) {
                 for (let x = 0; x < canvas.width; x += 5) {
                     const index = (y * canvas.width + x) * 4;
                     if (data[index + 3] > 128) {
-                        const px = (x - canvas.width / 2) * 0.02 + 5;
-                        const py = -(y - canvas.height / 2) * 0.02 + 8;
+                        // 使用动态计算的缩放因子
+                        const px = (x - canvas.width / 2) * scaleFactor;
+                        const py = -(y - canvas.height / 2) * scaleFactor + yOffset;
                         const pz = 0;
  
                         positions.push(px, py, pz);
@@ -714,4 +721,3 @@
 </body>
  
 </html>
-
