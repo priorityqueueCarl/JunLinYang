@@ -108,7 +108,6 @@
  
     <div id="overlay">
         <ul>
-            <li class="title">请选择音乐</li>
             <li>
                 <button class="btn" id="btnA" type="button">
                     打开音乐 Jingle Bell
@@ -200,6 +199,7 @@
  
             addPlane(scene, uniforms, 3000);
             addSnow(scene, uniforms);
+            addText(scene, uniforms);
  
             range(10).map(i => {
                 addTree(scene, uniforms, totalPoints, [20, 0, -20 * i]);
@@ -285,6 +285,112 @@
             };
  
             reader.readAsArrayBuffer(files[0]);
+        }
+ 
+        function addText(scene, uniforms) {
+            const text = "杨钧麟圣诞快乐！";
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            canvas.width = 2048;
+            canvas.height = 512;
+            ctx.font = "bold 120px sans-serif";
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+ 
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+ 
+            const positions = [];
+            const colors = [];
+            const sizes = [];
+            const phases = [];
+            const mIndexs = [];
+ 
+            const color = new THREE.Color();
+ 
+            for (let y = 0; y < canvas.height; y += 6) {
+                for (let x = 0; x < canvas.width; x += 6) {
+                    const index = (y * canvas.width + x) * 4;
+                    if (data[index + 3] > 128) {
+                        const px = (x - canvas.width / 2) * 0.03;
+                        const py = -(y - canvas.height / 2) * 0.03 + 8;
+                        const pz = 0;
+ 
+                        positions.push(px, py, pz);
+ 
+                        color.setHSL(Math.random() * 0.1 + 0.05, 1.0, 0.6);
+                        colors.push(color.r, color.g, color.b);
+ 
+                        phases.push(Math.random() * 1000);
+                        sizes.push(1);
+                        mIndexs.push(Math.random());
+                    }
+                }
+            }
+ 
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+            geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+            geometry.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
+            geometry.setAttribute("phase", new THREE.Float32BufferAttribute(phases, 1));
+            geometry.setAttribute("mIndex", new THREE.Float32BufferAttribute(mIndexs, 1));
+ 
+            const vertexShader = `
+                attribute float mIndex;
+                varying vec3 vColor;
+                varying float opacity;
+                uniform sampler2D tAudioData;
+                float norm(float value, float min, float max ){
+                    return (value - min) / (max - min);
+                }
+                float lerp(float norm, float min, float max){
+                    return (max - min) * norm + min;
+                }
+                float map(float value, float sourceMin, float sourceMax, float destMin, float destMax){
+                    return lerp(norm(value, sourceMin, sourceMax), destMin, destMax);
+                }
+                void main() {
+                    vColor = color;
+                    vec3 p = position;
+                    vec4 mvPosition = modelViewMatrix * vec4( p, 1.0 );
+                    float amplitude = texture2D( tAudioData, vec2( mIndex, 0.1 ) ).r;
+                    float amplitudeClamped = clamp(amplitude-0.4,0.0, 0.6 );
+                    float sizeMapped = map(amplitudeClamped, 0.0, 0.6, 1.0, 20.0);
+                    opacity = 1.0;
+                    gl_PointSize = sizeMapped * ( 40.0 / -mvPosition.z );
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `;
+ 
+            const fragmentShader = `
+                varying vec3 vColor;
+                varying float opacity;
+                uniform sampler2D pointTexture;
+                void main() {
+                    gl_FragColor = vec4( vColor, opacity );
+                    gl_FragColor = gl_FragColor * texture2D( pointTexture, gl_PointCoord ); 
+                }
+            `;
+ 
+            const shaderMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    ...uniforms,
+                    pointTexture: {
+                        value: new THREE.TextureLoader().load("https://assets.codepen.io/3685267/spark1.png")
+                    }
+                },
+                vertexShader,
+                fragmentShader,
+                blending: THREE.AdditiveBlending,
+                depthTest: false,
+                transparent: true,
+                vertexColors: true
+            });
+ 
+            const textMesh = new THREE.Points(geometry, shaderMaterial);
+            scene.add(textMesh);
         }
  
         function addTree(scene, uniforms, totalPoints, treePosition) {
